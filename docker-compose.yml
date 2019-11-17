@@ -1,0 +1,88 @@
+---
+
+version: '3.1'
+
+networks:
+  back-tier:
+    driver: bridge
+
+services:
+  postgresql-master:
+    image: bitnami/postgresql:${POSTGRESQL_VERSION}
+    container_name: postgresql-master
+    hostname: postgresql-master
+    user: ${ENV_DOCKER_USER}:${ENV_DOCKER_GROUP}
+    restart: always
+    ports:
+      - "${POSTGRESQL_MASTER_PORT}:${POSTGRESQL_MASTER_PORT}"
+    volumes:
+      - ./data/postgresql-master:/bitnami/postgresql:rw
+      - ./logs/postgresql-master:/opt/bitnami/postgresql/logs:rw
+      - ./scripts:/docker-entrypoint-initdb.d:rw
+    environment:
+      - TZ=${TIMEZONE}
+      - POSTGRESQL_POSTGRES_PASSWORD=${POSTGRESQL_POSTGRES_PASSWORD}
+      - POSTGRESQL_USERNAME=${POSTGRESQL_USERNAME}
+      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
+      - POSTGRES_MULTIPLE_DATABASES=${POSTGRESQL_MULTIPLE_DATABASE}
+      - POSTGRESQL_REPLICATION_MODE=${POSTGRESQL_REPLICATION_MODE_MASTER}
+      - POSTGRESQL_REPLICATION_USER=${POSTGRESQL_REPLICATION_USER}
+      - POSTGRESQL_REPLICATION_PASSWORD=${POSTGRESQL_REPLICATION_PASSWORD}
+      - ALLOW_EMPTY_PASSWORD=${ALLOW_EMPTY_PASSWORD}
+      - BITNAMI_DEBUG=true
+    networks:
+      - back-tier
+
+  postgresql-slave:
+    image: bitnami/postgresql:${POSTGRESQL_VERSION}
+    container_name: postgresql-slave
+    hostname: postgresql-slave
+    user: ${ENV_DOCKER_USER}:${ENV_DOCKER_GROUP}
+    restart: always
+    ports:
+      - "${POSTGRESQL_SLAVE_PORT}:${POSTGRESQL_MASTER_PORT}"
+    depends_on: 
+      - postgresql-master
+    volumes:
+      - ./data/postgresql-slave:/bitnami/postgresql:rw
+      - ./logs/postgresql-slave:/opt/bitnami/postgresql/logs:rw
+    environment:
+      - TZ=${TIMEZONE}
+      - POSTGRESQL_REPLICATION_MODE=${POSTGRESQL_REPLICATION_MODE_SLAVE}
+      - POSTGRESQL_REPLICATION_USER=${POSTGRESQL_REPLICATION_USER}
+      - POSTGRESQL_REPLICATION_PASSWORD=${POSTGRESQL_REPLICATION_PASSWORD}
+      - POSTGRESQL_MASTER_HOST=${POSTGRESQL_MASTER_HOST}
+      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
+      - POSTGRESQL_MASTER_PORT_NUMBER=${POSTGRESQL_MASTER_PORT}
+      - ALLOW_EMPTY_PASSWORD=${ALLOW_EMPTY_PASSWORD}
+      - BITNAMI_DEBUG=true
+    networks:
+      - back-tier
+
+  postgresql-backup:
+    image: prodrigestivill/postgres-backup-local:${BACKUP_VERSION}
+    container_name: postgresql-backup
+    hostname: postgresql-backup
+    restart: always
+    volumes:
+      - /mnt/volume_sgp1_psg_db_01:/backups:rw
+    links:
+      - postgresql-master
+    depends_on:
+      - postgresql-master
+    ports:
+      - "${HEALTHCHECK_PORT}:${HEALTHCHECK_PORT}"
+    environment:
+      - TZ=${TIMEZONE}
+      - POSTGRES_HOST=${POSTGRESQL_MASTER_HOST}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRESQL_USERNAME}
+      - POSTGRES_PASSWORD=${POSTGRESQL_PASSWORD}
+      - POSTGRES_EXTRA_OPTS=-Z9 --schema=public --blobs
+      - SCHEDULE=${SCHEDULE}
+      - BACKUP_KEEP_DAYS=${BACKUP_KEEP_DAYS}
+      - BACKUP_KEEP_WEEKS=${BACKUP_KEEP_WEEKS}
+      - BACKUP_KEEP_MONTHS=${BACKUP_KEEP_MONTHS}
+      - HEALTHCHECK_PORT=${HEALTHCHECK_PORT}
+    networks:
+      - back-tier
