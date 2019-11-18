@@ -65,7 +65,7 @@ services:
     hostname: postgresql-backup
     restart: always
     volumes:
-      - /mnt/volume_sgp1_psg_db_01:/backups:rw
+      - ./data/postgresql-backup:/backups:rw
     links:
       - postgresql-master
     depends_on:

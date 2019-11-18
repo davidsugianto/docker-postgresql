@@ -16,11 +16,8 @@ logs/postgresql-master/*
 !logs/postgresql-master/.keepfile
 logs/postgresql-slave/*
 !logs/postgresql-slave/.keepfile
-data/postgresql-master/*
-!data/postgresql-master/.keepfile
-data/postgresql-slave/*
-!data/postgresql-slave/.keepfile
-!.env
+data/postgresql-backup/*
+!data/postgresql-backup/.keepfile
 
 ######################################
 # GENERIC
