@@ -1,0 +1,72 @@
+#!/bin/bash
+
+set -e
+set -
+
+tee /opt/bitnami/postgresql/conf/pg_hba.conf << EOF
+host     all             all             0.0.0.0/0               md5
+host     all             all             ::1/128                 md5
+local    all             all                                     md5
+host     replication     all             0.0.0.0/0               md5
+host	 postgres		 all			 0.0.0.0/0				 md5
+EOF
+
+function create_user_and_database() {
+	local database=$1
+	echo "  Creating user and database '$database'"
+	psql -v ON_ERROR_STOP=1 --username 'postgres' <<-EOSQL
+	    CREATE DATABASE $database;
+EOSQL
+}
+
+function create_user_previledges() {
+	echo "creating database and set user permissions previledges"
+	psql -v ON_ERROR_STOP=1 --username 'postgres' <<-EOSQL
+		# REVOKE CREATE ON SCHEMA public FROM PUBLIC;
+		# REVOKE ALL ON DATABASE $POSTGRESQL_DB_1 FROM PUBLIC;
+		# REVOKE ALL ON DATABASE $POSTGRESQL_DB_2 FROM PUBLIC;
+
+		# CREATE ROLE readonly;
+		# GRANT CONNECT ON DATABASE $POSTGRESQL_DB_1 TO readonly;
+		# GRANT CONNECT ON DATABASE $POSTGRESQL_DB_2 TO readonly;
+		# GRANT USAGE ON SCHEMA public TO readonly;
+		# GRANT SELECT ON ALL TABLES IN SCHEMA public TO readonly;
+		# ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO readonly;
+
+		# CREATE ROLE readwrite;
+		# GRANT CONNECT ON DATABASE $POSTGRESQL_DB_1 TO readwrite;
+		# GRANT CONNECT ON DATABASE $POSTGRESQL_DB_2 TO readwrite;
+		# GRANT USAGE, CREATE ON SCHEMA public TO readwrite;
+		# GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO readwrite;
+		# ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO readwrite;
+		# GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO readwrite;
+		# ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE ON SEQUENCES TO readwrite;
+
+		# CREATE USER $DDL_DML_USER WITH PASSWORD '$DDL_DML_PASSWORD';
+		# CREATE USER $DML_USER WITH PASSWORD '$DML_PASSWORD';
+
+		# GRANT readonly TO $DML_USER;
+		# GRANT readwrite TO $DDL_DML_USER;
+
+		REVOKE CONNECT ON $POSTGRESQL_DB_1 FROM PUBLIC;
+		REVOKE CONNECT ON $POSTGRESQL_DB_2 FROM PUBLIC;
+		GRANT CONNECT ON $POSTGRESQL_DB_1 TO readonly;
+		GRANT CONNECT ON $POSTGRESQL_DB_2 TO readonly;
+
+		CREATE ROLE readonly NOSUPERUSER INHERIT NOCREATEDB NOCREATEROLE NOREPLICATION;
+		GRANT USAGE ON SCHEMA example to r_example_ro;
+		GRANT SELECT ON ALL TABLES IN SCHEMA example to r_example_ro;
+		ALTER DEFAULT PRIVILEGES IN SCHEMA example GRANT SELECT ON TABLES TO r_example_ro;
+
+EOSQL
+}
+
+if [ -n "$POSTGRES_MULTIPLE_DATABASES" ]; then
+	echo "Multiple database creation requested: $POSTGRES_MULTIPLE_DATABASES"
+	for db in $(echo $POSTGRES_MULTIPLE_DATABASES | tr ',' ' '); do
+		create_user_and_database $db
+	done
+	echo "Multiple databases created"
+	echo "permissions access"
+	create_user_previledges
+fi

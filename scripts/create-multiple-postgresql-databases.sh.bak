@@ -1,0 +1,39 @@
+#!/bin/bash
+
+set -e
+set -u
+
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+
+tee /opt/bitnami/postgresql/conf/pg_hba.conf << EOF
+host     all             	all             		0.0.0.0/0               md5
+host     all             	all             		::1/128                 md5
+local    all             	all                     		                md5
+host     replication     	all             		0.0.0.0/0               md5
+host	 postgres		 	all			 			0.0.0.0/0				md5
+host 	 all				postgres				0.0.0.0/0				md5
+host	 db_staging	 		$POSTGRESQL_USERNAME_DB 0.0.0.0/0				md5
+host	 db_production 		$POSTGRESQL_USERNAME_DB	0.0.0.0/0				md5
+EOF
+
+echo "  Creating user"
+	psql -v ON_ERROR_STOP=1 --username postgres <<-EOSQL
+		CREATE USER $POSTGRESQL_USERNAME_DB WITH PASSWORD '$POSTGRESQL_PASSWORD_DB';
+EOSQL
+
+function create_user_and_database() {
+	local database=$1
+	echo "  Creating user and database '$database'"
+	psql -v ON_ERROR_STOP=1 --username postgres <<-EOSQL
+	    CREATE DATABASE $database;
+	    GRANT ALL PRIVILEGES ON DATABASE $database TO $POSTGRESQL_USERNAME_DB;
+EOSQL
+}
+
+if [ -n "$POSTGRES_MULTIPLE_DATABASES" ]; then
+	echo "Multiple database creation requested: $POSTGRES_MULTIPLE_DATABASES"
+	for db in $(echo $POSTGRES_MULTIPLE_DATABASES | tr ',' ' '); do
+		create_user_and_database $db
+	done
+	echo "Multiple databases created"
+fi

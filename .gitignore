@@ -18,6 +18,10 @@ logs/postgresql-slave/*
 !logs/postgresql-slave/.keepfile
 data/postgresql-backup/*
 !data/postgresql-backup/.keepfile
+data/postgresql-master/*
+!data/postgresql-master/.keepfile
+data/postgresql-slave/*
+!data/postgresql-slave/.keepfile
 
 ######################################
 # GENERIC
@@ -26,8 +30,8 @@ data/postgresql-backup/*
 ###### std ######
 .lock
 *.log
-.env
-*.env
+!.env
+!*.env
 ###### patches/diffs ######
 *.patch
 *.diff

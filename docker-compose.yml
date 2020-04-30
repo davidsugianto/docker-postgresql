@@ -10,25 +10,32 @@ services:
   postgresql-master:
     image: bitnami/postgresql:${POSTGRESQL_VERSION}
     container_name: postgresql-master
-    hostname: postgresql-master
     user: ${ENV_DOCKER_USER}:${ENV_DOCKER_GROUP}
     restart: always
     ports:
       - "${POSTGRESQL_MASTER_PORT}:${POSTGRESQL_MASTER_PORT}"
+    expose:
+      - '${POSTGRESQL_MASTER_PORT}'
     volumes:
       - ./data/postgresql-master:/bitnami/postgresql:rw
       - ./logs/postgresql-master:/opt/bitnami/postgresql/logs:rw
-      - ./scripts:/docker-entrypoint-initdb.d:rw
+      - ./scripts:/docker-entrypoint-initdb.d:ro
     environment:
-      - TZ=${TIMEZONE}
-      - POSTGRESQL_POSTGRES_PASSWORD=${POSTGRESQL_POSTGRES_PASSWORD}
-      - POSTGRESQL_USERNAME=${POSTGRESQL_USERNAME}
-      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
-      - POSTGRES_MULTIPLE_DATABASES=${POSTGRESQL_MULTIPLE_DATABASE}
-      - POSTGRESQL_REPLICATION_MODE=${POSTGRESQL_REPLICATION_MODE_MASTER}
-      - POSTGRESQL_REPLICATION_USER=${POSTGRESQL_REPLICATION_USER}
-      - POSTGRESQL_REPLICATION_PASSWORD=${POSTGRESQL_REPLICATION_PASSWORD}
-      - ALLOW_EMPTY_PASSWORD=${ALLOW_EMPTY_PASSWORD}
+      - TZ=${TIMEZONE}                                                                                                   
+      - POSTGRESQL_POSTGRES_PASSWORD=${POSTGRESQL_POSTGRES_PASSWORD}                                                     
+      - POSTGRESQL_USERNAME=${POSTGRESQL_USERNAME}                                                                       
+      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}    
+      - POSTGRESQL_USER_DDL=${POSTGRESQL_USER_DDL}                                                                   
+      - POSTGRESQL_PASSWORD_DDL=${POSTGRESQL_PASSWORD_DDL}
+      - POSTGRESQL_USER_DML=${POSTGRESQL_USER_DML}                                                                   
+      - POSTGRESQL_PASSWORD_DML=${POSTGRESQL_PASSWORD_DML}                                                                  
+      - POSTGRES_MULTIPLE_DATABASES=${POSTGRESQL_MULTIPLE_DATABASE}                                                      
+      - POSTGRESQL_DB_STAGING=${POSTGRESQL_DB_STAGING}
+      - POSTGRESQL_DB_PRODUCTION=${POSTGRESQL_DB_PRODUCTION}
+      - POSTGRESQL_REPLICATION_MODE=${POSTGRESQL_REPLICATION_MODE_MASTER}                                                
+      - POSTGRESQL_REPLICATION_USER=${POSTGRESQL_REPLICATION_USER}                                                       
+      - POSTGRESQL_REPLICATION_PASSWORD=${POSTGRESQL_REPLICATION_PASSWORD}                                                                                                             
+      - ALLOW_EMPTY_PASSWORD=${ALLOW_EMPTY_PASSWORD}                                                                     
       - BITNAMI_DEBUG=true
     networks:
       - back-tier
@@ -36,11 +43,12 @@ services:
   postgresql-slave:
     image: bitnami/postgresql:${POSTGRESQL_VERSION}
     container_name: postgresql-slave
-    hostname: postgresql-slave
     user: ${ENV_DOCKER_USER}:${ENV_DOCKER_GROUP}
     restart: always
     ports:
       - "${POSTGRESQL_SLAVE_PORT}:${POSTGRESQL_MASTER_PORT}"
+    expose:
+      - '${POSTGRESQL_SLAVE_PORT}'
     depends_on: 
       - postgresql-master
     volumes:
@@ -62,10 +70,9 @@ services:
   postgresql-backup:
     image: prodrigestivill/postgres-backup-local:${BACKUP_VERSION}
     container_name: postgresql-backup
-    hostname: postgresql-backup
     restart: always
     volumes:
-      - ./data/postgresql-backup:/backups:rw
+      - /mnt/volume_sgp1_psg_db_01:/backups:rw
     links:
       - postgresql-master
     depends_on:
