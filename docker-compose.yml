@@ -18,17 +18,14 @@ services:
       - '${POSTGRESQL_MASTER_PORT}'
     volumes:
       - ./data/postgresql-master:/bitnami/postgresql:rw
+      - ./data/postgresql-backup:/backups:rw
       - ./logs/postgresql-master:/opt/bitnami/postgresql/logs:rw
       - ./scripts:/docker-entrypoint-initdb.d:ro
     environment:
       - TZ=${TIMEZONE}                                                                                                   
       - POSTGRESQL_POSTGRES_PASSWORD=${POSTGRESQL_POSTGRES_PASSWORD}                                                     
       - POSTGRESQL_USERNAME=${POSTGRESQL_USERNAME}                                                                       
-      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}    
-      - POSTGRESQL_USER_DDL=${POSTGRESQL_USER_DDL}                                                                   
-      - POSTGRESQL_PASSWORD_DDL=${POSTGRESQL_PASSWORD_DDL}
-      - POSTGRESQL_USER_DML=${POSTGRESQL_USER_DML}                                                                   
-      - POSTGRESQL_PASSWORD_DML=${POSTGRESQL_PASSWORD_DML}                                                                  
+      - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
       - POSTGRES_MULTIPLE_DATABASES=${POSTGRESQL_MULTIPLE_DATABASE}                                                      
       - POSTGRESQL_DB_STAGING=${POSTGRESQL_DB_STAGING}
       - POSTGRESQL_DB_PRODUCTION=${POSTGRESQL_DB_PRODUCTION}
@@ -67,29 +64,29 @@ services:
     networks:
       - back-tier
 
-  postgresql-backup:
-    image: prodrigestivill/postgres-backup-local:${BACKUP_VERSION}
-    container_name: postgresql-backup
-    restart: always
-    volumes:
-      - /mnt/volume_sgp1_psg_db_01:/backups:rw
-    links:
-      - postgresql-master
-    depends_on:
-      - postgresql-master
-    ports:
-      - "${HEALTHCHECK_PORT}:${HEALTHCHECK_PORT}"
-    environment:
-      - TZ=${TIMEZONE}
-      - POSTGRES_HOST=${POSTGRESQL_MASTER_HOST}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRESQL_USERNAME}
-      - POSTGRES_PASSWORD=${POSTGRESQL_PASSWORD}
-      - POSTGRES_EXTRA_OPTS=-Z9 --schema=public --blobs
-      - SCHEDULE=${SCHEDULE}
-      - BACKUP_KEEP_DAYS=${BACKUP_KEEP_DAYS}
-      - BACKUP_KEEP_WEEKS=${BACKUP_KEEP_WEEKS}
-      - BACKUP_KEEP_MONTHS=${BACKUP_KEEP_MONTHS}
-      - HEALTHCHECK_PORT=${HEALTHCHECK_PORT}
-    networks:
-      - back-tier
+  # postgresql-backup:
+  #   image: prodrigestivill/postgres-backup-local:${BACKUP_VERSION}
+  #   container_name: postgresql-backup-staging
+  #   restart: always
+  #   volumes:
+  #     - /mnt/volume_sgp1_psg_db_01:/backups:rw
+  #   links:
+  #     - postgresql-master
+  #   depends_on:
+  #     - postgresql-master
+  #   ports:
+  #     - "8080:${HEALTHCHECK_PORT}"
+  #   environment:
+  #     - TZ=${TIMEZONE}
+  #     - POSTGRES_HOST=${POSTGRESQL_MASTER_HOST}
+  #     - POSTGRES_DB=${POSTGRES_DB_STAGING}
+  #     - POSTGRES_USER=${POSTGRESQL_USER_DDL}
+  #     - POSTGRES_PASSWORD=${POSTGRESQL_PASSWORD_DDL}
+  #     - POSTGRES_EXTRA_OPTS=-Z9 --schema=public --blobs
+  #     - SCHEDULE=${SCHEDULE}
+  #     - BACKUP_KEEP_DAYS=${BACKUP_KEEP_DAYS}
+  #     - BACKUP_KEEP_WEEKS=${BACKUP_KEEP_WEEKS}
+  #     - BACKUP_KEEP_MONTHS=${BACKUP_KEEP_MONTHS}
+  #     - HEALTHCHECK_PORT=${HEALTHCHECK_PORT}
+  #   networks:
+  #     - back-tier

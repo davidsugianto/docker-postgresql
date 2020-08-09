@@ -20,3 +20,30 @@ Getting started with using PostgreSQL has never been easier - pick a project you
 ### Docker
 
 Docker is an open platform for developing, shipping, and running applications. Docker enables you to separate your applications from your infrastructure so you can deliver software quickly. With Docker, you can manage your infrastructure in the same ways you manage your applications. By taking advantage of Docker’s methodologies for shipping, testing, and deploying code quickly, you can significantly reduce the delay between writing code and running it in production.
+
+## Role Base Access Control Configuration
+- Role:
+  - staging
+    - full -> ALL PRIVILEGES 
+    - ddl  -> CREATE, CONNECT, ALTER, DROP, RENAME, TURNCATE, REFRENCES, SELECT, INSERT
+    - dml  -> CONNECT, SELECT, INSERT, UPDATE, DELETE
+  - production
+    - full -> ALL PRIVILEGES
+    - ddl  -> CREATE, CONNECT, ALTER, DROP, RENAME, TURNCATE, REFRENCES, SELECT, INSERT
+    - dml  -> CONNECT, SELECT, INSERT, UPDATE, DELETE
+- User access to role:
+  - postgres      (root)
+  - user_backup   (full)
+  - staging
+    - user_full     (full)
+    - user_replica  (full)
+    - user_ddl      (ddl)
+    - user_dml      (dml)
+  - produciton
+    - user_full     (full)
+    - user_replica  (full)
+    - user_ddl      (ddl)
+    - user_dml      (dml)
+
+## Backup and recovery
+
