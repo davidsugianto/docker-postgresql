@@ -10,7 +10,7 @@ services:
   postgresql-master:
     image: bitnami/postgresql:${POSTGRESQL_VERSION}
     container_name: postgresql-master
-    user: ${ENV_DOCKER_USER}:${ENV_DOCKER_GROUP}
+    # user: ${ENV_DOCKER_USER}:${ENV_DOCKER_GROUP}
     restart: always
     ports:
       - "${POSTGRESQL_MASTER_PORT}:${POSTGRESQL_MASTER_PORT}"
@@ -18,15 +18,16 @@ services:
       - '${POSTGRESQL_MASTER_PORT}'
     volumes:
       - ./data/postgresql-master:/bitnami/postgresql:rw
-      - ./data/postgresql-backup:/backups:rw
+      - ./data/postgresql-backup/staging:/home/postgres/staging
+      - ./data/postgresql-backup/production:/home/postgres/production
       - ./logs/postgresql-master:/opt/bitnami/postgresql/logs:rw
-      - ./scripts:/docker-entrypoint-initdb.d:ro
+      - ./scripts/postgresql:/docker-entrypoint-initdb.d:rw
     environment:
       - TZ=${TIMEZONE}                                                                                                   
       - POSTGRESQL_POSTGRES_PASSWORD=${POSTGRESQL_POSTGRES_PASSWORD}                                                     
       - POSTGRESQL_USERNAME=${POSTGRESQL_USERNAME}                                                                       
       - POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}
-      - POSTGRES_MULTIPLE_DATABASES=${POSTGRESQL_MULTIPLE_DATABASE}                                                      
+      - POSTGRESQL_MULTIPLE_DATABASES=${POSTGRESQL_MULTIPLE_DATABASE}                                                      
       - POSTGRESQL_DB_STAGING=${POSTGRESQL_DB_STAGING}
       - POSTGRESQL_DB_PRODUCTION=${POSTGRESQL_DB_PRODUCTION}
       - POSTGRESQL_REPLICATION_MODE=${POSTGRESQL_REPLICATION_MODE_MASTER}                                                
@@ -40,7 +41,7 @@ services:
   postgresql-slave:
     image: bitnami/postgresql:${POSTGRESQL_VERSION}
     container_name: postgresql-slave
-    user: ${ENV_DOCKER_USER}:${ENV_DOCKER_GROUP}
+    # user: ${ENV_DOCKER_USER}:${ENV_DOCKER_GROUP}
     restart: always
     ports:
       - "${POSTGRESQL_SLAVE_PORT}:${POSTGRESQL_MASTER_PORT}"
