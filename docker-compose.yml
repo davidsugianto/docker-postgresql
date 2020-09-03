@@ -77,7 +77,7 @@ services:
       - 'POSTGRSQL_STAGING_DATABASE=${POSTGRESQL_DB_STAGING}'
       - 'POSTGRSQL_PRODUCTION_DATABASE=${POSTGRESQL_DB_PRODUCTION}'
     networks:
-      - app-tier
+      - back-tier
     depends_on: 
       - postgresql-master
     volumes:
