@@ -32,7 +32,8 @@ services:
       - POSTGRESQL_REPLICATION_MODE=${POSTGRESQL_REPLICATION_MODE_MASTER}                                                
       - POSTGRESQL_REPLICATION_USER=${POSTGRESQL_REPLICATION_USER}                                                       
       - POSTGRESQL_REPLICATION_PASSWORD=${POSTGRESQL_REPLICATION_PASSWORD}                                                                                                             
-      - ALLOW_EMPTY_PASSWORD=${ALLOW_EMPTY_PASSWORD}                                                                     
+      - ALLOW_EMPTY_PASSWORD=${ALLOW_EMPTY_PASSWORD}   
+      # - POSTGRESQL_PGHBA_REMOVE_FILTERS=local, md5
       - BITNAMI_DEBUG=true
     networks:
       - back-tier
@@ -63,23 +64,23 @@ services:
     networks:
       - back-tier
 
-  postgresql-backup:
-    container_name: postgresql-backup
-    build: 
-      context: ./scripts/backups
-    restart: unless-stopped 
-    environment:
-      - 'TZ=${TIMEZONE}'
-      - 'POSTGRSQL_USER=${POSTGRESQL_USERNAME}'
-      - 'POSTGRSQL_PASSWORD=${POSTGRESQL_PASSWORD}'
-      - 'POSTGRSQL_HOST=${POSTGRESQL_MASTER_HOST}'
-      - 'POSTGRSQL_PORT=${POSTGRESQL_MASTER_PORT}'
-      - 'POSTGRSQL_STAGING_DATABASE=${POSTGRESQL_DB_STAGING}'
-      - 'POSTGRSQL_PRODUCTION_DATABASE=${POSTGRESQL_DB_PRODUCTION}'
-    networks:
-      - back-tier
-    depends_on: 
-      - postgresql-master
-    volumes:
-      - ./data/postgresql-backup/staging:/backups/staging
-      - ./data/postgresql-backup/production:/backups/production
+  # postgresql-backup:
+  #   container_name: postgresql-backup
+  #   build: 
+  #     context: ./scripts/backups
+  #   restart: unless-stopped 
+  #   environment:
+  #     - 'TZ=${TIMEZONE}'
+  #     - 'POSTGRSQL_USER=${POSTGRESQL_USERNAME}'
+  #     - 'POSTGRSQL_PASSWORD=${POSTGRESQL_PASSWORD}'
+  #     - 'POSTGRSQL_HOST=${POSTGRESQL_MASTER_HOST}'
+  #     - 'POSTGRSQL_PORT=${POSTGRESQL_MASTER_PORT}'
+  #     - 'POSTGRSQL_STAGING_DATABASE=${POSTGRESQL_DB_STAGING}'
+  #     - 'POSTGRSQL_PRODUCTION_DATABASE=${POSTGRESQL_DB_PRODUCTION}'
+  #   networks:
+  #     - back-tier
+  #   depends_on: 
+  #     - postgresql-master
+  #   volumes:
+  #     - ./data/postgresql-backup/staging:/backups/staging
+  #     - ./data/postgresql-backup/production:/backups/production
