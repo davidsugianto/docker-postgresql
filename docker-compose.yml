@@ -33,7 +33,6 @@ services:
       - POSTGRESQL_REPLICATION_USER=${POSTGRESQL_REPLICATION_USER}                                                       
       - POSTGRESQL_REPLICATION_PASSWORD=${POSTGRESQL_REPLICATION_PASSWORD}                                                                                                             
       - ALLOW_EMPTY_PASSWORD=${ALLOW_EMPTY_PASSWORD}   
-      # - POSTGRESQL_PGHBA_REMOVE_FILTERS=local, md5
       - BITNAMI_DEBUG=true
     networks:
       - back-tier
