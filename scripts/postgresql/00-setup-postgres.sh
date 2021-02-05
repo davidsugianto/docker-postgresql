@@ -23,7 +23,7 @@ function setup_pghba() {
   tee /opt/bitnami/postgresql/conf/pg_hba.conf << EOF
   host   all             	          all             		  0.0.0.0/0  md5
   host   all             	          all             		  ::1/128    md5
-  local  all             	          all                   0.0.0.0/0  md5
+  local  all             	          all                              md5
   host   replication     	          all             		  0.0.0.0/0  md5
   host	 postgres		 	              all			 			        0.0.0.0/0	 md5
   host 	 all				                postgres				      0.0.0.0/0	 md5
