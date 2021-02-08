@@ -1,5 +1,4 @@
 ---
-
 version: '3.1'
 
 networks:
@@ -70,12 +69,12 @@ services:
     restart: unless-stopped 
     environment:
       - 'TZ=${TIMEZONE}'
-      - 'POSTGRSQL_USER=${POSTGRESQL_USERNAME}'
-      - 'POSTGRSQL_PASSWORD=${POSTGRESQL_PASSWORD}'
-      - 'POSTGRSQL_HOST=${POSTGRESQL_MASTER_HOST}'
-      - 'POSTGRSQL_PORT=${POSTGRESQL_MASTER_PORT}'
-      - 'POSTGRSQL_STAGING_DATABASE=${POSTGRESQL_DB_STAGING}'
-      - 'POSTGRSQL_PRODUCTION_DATABASE=${POSTGRESQL_DB_PRODUCTION}'
+      - 'POSTGRESQL_USER=${POSTGRESQL_USERNAME}'
+      - 'POSTGRESQL_PASSWORD=${POSTGRESQL_PASSWORD}'
+      - 'POSTGRESQL_HOST=${POSTGRESQL_MASTER_HOST}'
+      - 'POSTGRESQL_PORT=${POSTGRESQL_MASTER_PORT}'
+      - 'POSTGRESQL_STAGING_DATABASE=${POSTGRESQL_DB_STAGING}'
+      - 'POSTGRESQL_PRODUCTION_DATABASE=${POSTGRESQL_DB_PRODUCTION}'
     networks:
       - back-tier
     depends_on: 
@@ -83,3 +82,4 @@ services:
     volumes:
       - ./data/postgresql-backup/staging:/backups/staging
       - ./data/postgresql-backup/production:/backups/production
+      - ./logs/postgresql-backup:/var/log/db_dump

@@ -16,8 +16,10 @@ logs/postgresql-master/*
 !logs/postgresql-master/.keepfile
 logs/postgresql-slave/*
 !logs/postgresql-slave/.keepfile
-data/postgresql-backup/*
-!data/postgresql-backup/.keepfile
+data/postgresql-backup/staging/*
+!data/postgresql-backup/staging/.keepfile
+data/postgresql-backup/production/*
+!data/postgresql-backup/production/.keepfile
 data/postgresql-master/*
 !data/postgresql-master/.keepfile
 data/postgresql-slave/*
