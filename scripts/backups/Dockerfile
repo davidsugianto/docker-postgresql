@@ -14,9 +14,9 @@ COPY ./scripts /scripts
 RUN apt update -y && apt install -y curl cron postgresql-client && \
     mkdir -p /backups/staging && chmod -R 777 /backups/staging && \
     mkdir -p /backups/production && chmod -R 777 /backups/production && \
+    mkdir -p /var/log/db_dump && chmod -R 777 /var/log/db_dump && \
     chmod -R 777 /backups && \
-    find /scripts -type f -iname "*.sh" -exec chmod a+x {} \; && \
-    mkdir -p /var/log/db_dump && chmod -R 777 /var/log/db_dump
+    find /scripts -type f -iname "*.sh" -exec chmod a+x {} \;
 
 VOLUME ["/backups", "/var/log"]
 
